@@ -1,0 +1,15 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#1B312F",
+        "titleBar.activeBackground": "#254542",
+        "titleBar.activeForeground": "#F8FBFB"
+    },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "python.formatting.provider": "none",
+    "cSpell.words": [
+        "euluc",
+        "latlonnw"
+    ]
+}
