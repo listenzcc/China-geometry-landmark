@@ -1,5 +1,5 @@
 """
-File: overview.py
+File: plot_landmarks.py
 Author: Chuncheng Zhang
 Date: 2023-04-27
 Copyright & Email: chuncheng.zhang@ia.ac.cn
@@ -40,7 +40,7 @@ colors
 # Pending
 
 
-def plot_geometry(df, path=None, legend_outside_flag=False, show_flag=False, land_types=land_types):
+def plot_landmarks(df, path=None, legend_outside_flag=False, show_flag=False, land_types=land_types):
     '''
     Plot the df with its levels of land type.
 
@@ -104,12 +104,12 @@ def plot_geometry(df, path=None, legend_outside_flag=False, show_flag=False, lan
 # Pending
 target_city_code = 110100
 df = table.query(f'City_CODE == {target_city_code}').copy()
-plot_geometry(df, Path(f'image/{target_city_code}.jpg'), True, False)
+plot_landmarks(df, Path(f'image/{target_city_code}.jpg'), True, False)
 
 target_city_code = 120100
 df = table.query(f'City_CODE == {target_city_code}').copy()
-plot_geometry(df, Path(f'image/{target_city_code}.jpg'), True, False)
+plot_landmarks(df, Path(f'image/{target_city_code}.jpg'), True, False)
 
-plot_geometry(table, Path(f'image/china.jpg'), False, False)
+plot_landmarks(table, Path(f'image/china.jpg'), False, False)
 
 # %%
