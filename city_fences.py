@@ -24,6 +24,7 @@ import traceback
 import geopandas as gpd
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 import pandas as pd
 from sklearn.cluster import KMeans
@@ -47,12 +48,15 @@ euluc_table
 
 def group2stacked(group, read_city_flag=False):
     '''
-    Convert the group into stacked multi-indexed DataFrame
+    Convert the group into stacked multi-indexed DataFrame.
+    The F_AREA column of the column will be converted into its ratio other than the raw values.
     '''
     table = group['F_AREA'].sum()
     sum_by_city = table.groupby(level=0).sum()
 
     features = []
+
+    city_code_dct = dict()
 
     # Add china hull at first
     if read_city_flag:
@@ -65,6 +69,8 @@ def group2stacked(group, read_city_flag=False):
         # if the read_city_flag is set.
         if read_city_flag:
             adc, fen = adcode_dataset.get_city(c)
+            if adc is not None:
+                city_code_dct[c] = adc.iloc[0]['full_name_cn']
         else:
             fen = None
 
@@ -81,20 +87,26 @@ def group2stacked(group, read_city_flag=False):
 
     table = pd.DataFrame(table)
 
-    return table, feature_collection
+    return table, feature_collection, city_code_dct
 
 
 # %%
 group = euluc_table.groupby(['City_CODE', 'Level1'])
-table, feature_collection = group2stacked(group, read_city_flag=True)
+table, feature_collection, city_code_dct = group2stacked(
+    group, read_city_flag=True)
 
 group = euluc_table.groupby(['City_CODE', 'Level2'])
-table_level2, _ = group2stacked(group)
+table_level2, _, _ = group2stacked(group)
 
 table_level2
 
 # %%
-euluc_table
+city_code_dct
+
+# %%
+
+
+# %%
 
 # %%
 # Prepare geoDataFrame for the feature_collection
@@ -159,9 +171,6 @@ def plot_map(df,
 
 
 # %%
-table_level2.unstack().fillna(0)
-
-# %%
 '''
 Perform KMeans clustering on the cities by their level2 land marks.
 And draw their types on the map.
@@ -170,12 +179,12 @@ mat = table_level2.unstack().fillna(0).to_numpy()
 num_cluster = 5
 cluster = KMeans(num_cluster, n_init='auto')
 cluster.fit_transform(mat)
-labels = cluster.labels_
-labels
+cluster_labels = cluster.labels_
+cluster_labels
 
 df = table_level2.groupby(level=0).sum()
 df['adcode'] = df.index
-df['Cluster'] = [f'Cluster {e}' for e in labels]
+df['Cluster'] = [f'Cluster {e}' for e in cluster_labels]
 df
 
 dpi = 200
@@ -218,5 +227,60 @@ plt.show()
 
 # %%
 
+
+def draw_city_scatter(df_city_summary, kwargs):
+    '''
+    Draw the city scatter in the df_city_summary,
+    with kwargs.
+    '''
+
+    # -------------------------------------
+    fig = px.scatter(df_city_summary,
+                     x='01Residential',
+                     y='05Public',
+                     title='Residential, Public, and Commercial',
+                     **kwargs
+                     )
+    fig.show()
+
+    # -------------------------------------
+    fig = px.scatter(df_city_summary,
+                     x='01Residential',
+                     y='03Industrial',
+                     title='Residential, Industrial, and Commercial',
+                     **kwargs
+                     )
+    fig.show()
+
+    # -------------------------------------
+    fig = px.scatter_3d(df_city_summary,
+                        x='01Residential',
+                        y='05Public',
+                        z='03Industrial',
+                        title='Residential, Public, Industrial, and Commercial',
+                        **kwargs
+                        )
+    fig.show()
+
+
+# ----------------------------
+kwargs = dict(
+    color='Label',
+    size='02Commercial',
+    size_max=15,
+    hover_data=['City'],
+    width=600,
+    height=600,
+)
+
+df = table.unstack().fillna(0)['F_AREA']
+df.columns = [''.join(land_types[e].split(' ')[:2]) for e in df.columns]
+df['City'] = [city_code_dct.get(e, e) for e in df.index]
+df['Label'] = [f'Cluster {e}' for e in cluster_labels]
+df_city_summary = df
+
+draw_city_scatter(df_city_summary, kwargs)
+
+df_city_summary.to_csv('csv/city_summary.csv')
 
 # %%
