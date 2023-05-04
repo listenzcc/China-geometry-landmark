@@ -67,6 +67,8 @@ class AdcodeDataset(object):
 
         Args:
             param: root: pathlib: The path of the directory containing 'adcode' and 'fences' folders.
+            param: adcode_describe: str: The multiple lines description of the city.
+            param: adcode_rank_dct: dict: The rank table of the number in adcode_describe.
         '''
         self.root = Path(root)
 
