@@ -108,7 +108,8 @@ print(position[:4], position.shape)
 
 delaunay = Delaunay(position)
 print(delaunay)
-delaunay.simplices.shape
+print(delaunay.simplices.shape)
+delaunay.__dict__
 
 # %% ---- 2023-05-04 ------------------------
 # Pending
@@ -176,4 +177,7 @@ neighbor_dataFrame
 
 # %%
 json.dump(land_types, open(Path('json/land_types.json'), 'w'))
+
+# %%
+
 # %%
